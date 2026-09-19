@@ -9,39 +9,56 @@
 body{margin:0;background:#05070d;color:#eef4ff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;padding:24px}
 .card{max-width:440px;margin:0 auto;background:#101726;border:1px solid #1e2a44;border-radius:16px;padding:20px}
 h1{margin:0 0 4px;font-size:20px} h1 span{color:#1e90ff}
-.muted{color:#8ea0c0} .badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#142033;color:#7eb8ff;font-weight:700;font-size:12px}
+.muted{color:#8ea0c0;font-size:13px}
+.badge{display:inline-block;padding:4px 10px;border-radius:999px;background:#142033;color:#7eb8ff;font-weight:700;font-size:12px}
 ul{list-style:none;margin:16px 0 0;padding:0}
 li{position:relative;padding:0 0 16px 28px}
 li:before{content:"";position:absolute;left:6px;top:6px;width:10px;height:10px;border-radius:50%;background:#3a4a66;border:2px solid #1e90ff}
 li.now:before{background:#3dd68c}
 li:after{content:"";position:absolute;left:10px;top:18px;bottom:0;width:2px;background:#1e2a44}
 li:last-child:after{display:none}
-input,button{font:inherit;width:100%;box-sizing:border-box;border-radius:12px;padding:12px;margin-top:8px}
-input{background:#0b101c;border:1px solid #1e2a44;color:#fff}
-button{background:#1e90ff;border:0;color:#041018;font-weight:700}
 .alert{background:#10281c;border:1px solid #245c3c;color:#b6f0cf;padding:10px;border-radius:12px;margin-top:12px}
 </style>
 </head>
 <body>
 <div class="card" id="box"><p class="muted">Carregando…</p></div>
 <script>
-const CLOUD='https://jsonblob.com/api/jsonBlob';
 const STEPS=[['aguardando_orcamento','Aguardando orçamento'],['aprovado','Aprovado'],['aguardando_peca','Aguardando peça'],['em_reparo','Em reparo'],['pronto','Pronto'],['entregue','Entregue']];
 const lab=id=>(STEPS.find(s=>s[0]===id)||[id,id])[1];
-const q=new URLSearchParams(location.search);
-function codeOf(s){const t=String(s||'').toUpperCase();const m=t.match(/EC[A-Z0-9]{4,10}/);return m?m[0]:t.replace(/[^A-Z0-9]/g,'');}
-async function load(){
-  const ver=codeOf(q.get('ver')); const db=q.get('db')||'';
-  const box=document.getElementById('box');
-  if(!ver){box.innerHTML='<h1>ELITE <span>CELL</span></h1><p class="muted">Digite o código da OS</p><input id="c" placeholder="EC3Z5SL"><button onclick="location.search=\'?ver=\'+c.value+(q.get(\'db\')?(\'&db=\'+q.get(\'db\')):\'\')">Ver</button>';return;}
-  let pub=null;
-  if(db){try{const data=await(await fetch(CLOUD+'/'+db)).json();pub=(data.os||[]).find(o=>codeOf(o.trackCode)===ver);}catch(e){}}
-  if(!pub){box.innerHTML='<h1>ELITE <span>CELL</span></h1><p>OS não encontrada.</p><p class="muted">Peça à loja para ativar a Nuvem e enviar o link de novo.</p><input id="c" value="'+ver+'"><button onclick="location.search=\'?ver=\'+c.value+(db?(\'&db=\'+db):\'\')">Tentar de novo</button>';return;}
-  const cur=pub.status;
-  const idx=STEPS.findIndex(s=>s[0]===cur);
-  box.innerHTML='<h1>ELITE <span>CELL</span></h1><p class="muted">Acompanhar reparo</p><p>'+(pub.marca||'')+' '+(pub.modelo||'')+' · '+(pub.numero||'')+'</p><p><span class="badge">'+lab(cur)+'</span></p>'+(pub.prazo?('<p class="muted">Prazo: '+pub.prazo+'</p>'):'')+(pub.notaCliente?('<div class="alert">'+pub.notaCliente+'</div>'):'')+'<ul>'+STEPS.map((s,i)=>{const ev=(pub.timeline||[]).filter(t=>t.status===s[0]).pop();return '<li class="'+(i<=idx?'now':'')+'"><b>'+s[1]+'</b><div class="muted">'+(ev?new Date(ev.at).toLocaleString('pt-BR'):(i<=idx?'Concluído':'Aguardando'))+'</div></li>';}).join('')+'</ul>'+(cur==='pronto'?'<div class="alert"><b>Pronto para retirada.</b></div>':'');
+function unpack(s){
+  if(!s) return null;
+  try{
+    s=s.replace(/-/g,'+').replace(/_/g,'/');
+    while(s.length%4) s+='=';
+    return JSON.parse(decodeURIComponent(escape(atob(s))));
+  }catch(e){ return null; }
 }
-load();
+function render(pub){
+  const cur=pub.s||pub.status||'aguardando_orcamento';
+  const idx=STEPS.findIndex(x=>x[0]===cur);
+  const marca=pub.m||((pub.marca||'')+' '+(pub.modelo||'')).trim();
+  const numero=pub.n||pub.numero||'';
+  const prazo=pub.p||pub.prazo||'';
+  const nota=pub.o||pub.notaCliente||'';
+  const tl=pub.t||pub.timeline||[];
+  document.getElementById('box').innerHTML=
+    '<h1>ELITE <span>CELL</span></h1><p class="muted">Acompanhar reparo</p>'+
+    '<p>'+marca+(numero?(' · '+numero):'')+'</p>'+
+    '<p><span class="badge">'+lab(cur)+'</span></p>'+
+    (prazo?('<p class="muted">Prazo: '+prazo+'</p>'):'')+
+    (nota?('<div class="alert">'+nota+'</div>'):'')+
+    '<ul>'+STEPS.map((s,i)=>{
+      const ev=tl.find?tl.filter(x=>(x.status||x[0])===s[0]).pop():null;
+      const at=ev?(ev.at||ev[1]):'';
+      return '<li class="'+(i<=idx&&cur!=='recusado'?'now':'')+'"><b>'+s[1]+'</b><div class="muted">'+(at?new Date(at).toLocaleString('pt-BR'):(i<=idx?'Concluído':'Aguardando'))+'</div></li>';
+    }).join('')+'</ul>'+
+    (cur==='pronto'?'<div class="alert"><b>Pronto para retirada.</b></div>':'')+
+    '<p class="muted" style="margin-top:16px">Status no momento em que a loja enviou este link. Se mudar, você recebe outro no WhatsApp.</p>';
+}
+const q=new URLSearchParams(location.search);
+const pub=unpack(q.get('d'));
+if(pub) render(pub);
+else document.getElementById('box').innerHTML='<h1>ELITE <span>CELL</span></h1><p>Link incompleto.</p><p class="muted">Peça à loja para enviar de novo pelo WhatsApp da OS.</p>';
 </script>
 </body>
 </html>
