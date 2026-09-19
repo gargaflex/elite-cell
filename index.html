@@ -4,16 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#05070d" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Elite Cell" />
   <title>Elite Cell</title>
-  <link rel="manifest" href="manifest.json" />
   <style>
     :root { --bg:#05070d; --bg2:#0b101c; --card:#101726; --line:#1e2a44; --blue:#1e90ff; --blue2:#3aa0ff; --blue-dim:rgba(30,144,255,.14); --text:#eef4ff; --muted:#8ea0c0; --ok:#3dd68c; --warn:#f5c542; --danger:#ff5d6c; --radius:16px; }
     * { box-sizing:border-box; }
-    html,body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif; }
+    html,body { margin:0; padding:0; background:var(--bg); color:var(--text); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
     button,input,select,textarea { font:inherit; color:inherit; }
     body.shop { display:flex; min-height:100vh; }
     .app { flex:1; max-width:1180px; margin:0 auto; padding:16px; width:100%; }
-    header.top { display:flex; align-items:center; gap:12px; padding:8px 0 16px; border-bottom:1px solid var(--line); margin-bottom:16px; }
+    header.top { display:flex; align-items:center; gap:12px; padding:8px 0 16px; border-bottom:1px solid var(--line); margin-bottom:16px; flex-wrap:wrap; }
     .brand { display:flex; align-items:center; gap:12px; flex:1; min-width:0; }
     .logo-mark { width:48px; height:48px; border-radius:12px; background:#070b14; border:1px solid #2a3d66; display:grid; place-items:center; }
     .brand h1 { margin:0; font-size:18px; letter-spacing:.08em; }
@@ -26,7 +27,7 @@
     .stat .k { color:var(--muted); font-size:12px; }
     .stat .v { font-size:22px; font-weight:700; margin-top:6px; }
     .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
-    .btn { background:var(--blue); color:#041018; border:0; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer; }
+    .btn { background:var(--blue); color:#041018; border:0; border-radius:12px; padding:10px 14px; font-weight:700; cursor:pointer; min-height:44px; }
     .btn.ghost { background:transparent; color:var(--text); border:1px solid var(--line); }
     .btn.danger { background:var(--danger); color:#1a0508; }
     .btn.ok { background:var(--ok); color:#052015; }
@@ -35,11 +36,9 @@
     textarea { min-height:78px; resize:vertical; }
     label { display:block; font-size:12px; color:var(--muted); margin:0 0 6px; }
     .field { margin-bottom:12px; }
-    .form-grid { display:grid; gap:12px; grid-template-columns:1fr; }
-    @media (min-width:700px){ .form-grid.two { grid-template-columns:1fr 1fr; } }
+    .form-grid { display:grid; gap:12px; }
     table { width:100%; border-collapse:collapse; font-size:13px; }
     th,td { text-align:left; padding:10px 8px; border-bottom:1px solid var(--line); vertical-align:top; }
-    th { color:var(--muted); font-weight:600; font-size:11px; text-transform:uppercase; }
     .badge { display:inline-block; padding:3px 8px; border-radius:999px; font-size:11px; font-weight:700; }
     .s-aguardando_orcamento { background:#2a2410; color:var(--warn); }
     .s-aprovado { background:var(--blue-dim); color:var(--blue2); }
@@ -48,16 +47,14 @@
     .s-pronto { background:#10281c; color:var(--ok); }
     .s-entregue { background:#1a1f2a; color:#9aa8c0; }
     .s-recusado { background:#2a1216; color:var(--danger); }
-    nav.side { width:236px; flex-shrink:0; background:#080c16; border-right:1px solid var(--line); padding:16px 12px; display:flex; flex-direction:column; gap:6px; position:sticky; top:0; height:100vh; }
-    nav.side .nav-title { color:var(--muted); font-size:11px; letter-spacing:.12em; text-transform:uppercase; padding:8px 10px 12px; }
-    nav.side button { background:transparent; border:0; color:var(--muted); text-align:left; padding:11px 12px; border-radius:12px; cursor:pointer; font-size:14px; font-weight:600; }
-    nav.side button:hover { background:var(--blue-dim); color:var(--text); }
+    nav.side { width:236px; flex-shrink:0; background:#080c16; border-right:1px solid var(--line); padding:16px 12px; display:flex; flex-direction:column; gap:6px; }
+    nav.side button { background:transparent; border:0; color:var(--muted); text-align:left; padding:11px 12px; border-radius:12px; cursor:pointer; font-weight:600; }
     nav.side button.active { background:var(--blue); color:#041018; }
     nav.side .quick { margin-top:auto; }
     .menu-btn { display:none; }
     @media (max-width:800px){
       body.shop { display:block; }
-      nav.side { position:fixed; left:0; top:0; bottom:0; z-index:30; transform:translateX(-105%); transition:transform .2s ease; }
+      nav.side { position:fixed; left:0; top:0; bottom:0; z-index:30; transform:translateX(-105%); width:min(280px,86vw); }
       nav.side.open { transform:translateX(0); }
       .menu-btn { display:inline-flex; }
       .side-bg { display:none; position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:25; }
@@ -65,33 +62,14 @@
     }
     .hidden { display:none !important; }
     .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:40; display:flex; align-items:flex-end; justify-content:center; }
-    @media (min-width:720px){ .modal-bg { align-items:center; } .modal { border-radius:20px; } }
-    .modal { background:var(--bg2); border:1px solid var(--line); border-radius:20px 20px 0 0; width:min(780px,100%); max-height:92vh; overflow:auto; padding:16px; }
-    .photos { display:flex; gap:8px; flex-wrap:wrap; }
-    .photos img { width:84px; height:84px; object-fit:cover; border-radius:10px; border:1px solid var(--line); }
-    .alert { background:#13281d; border:1px solid #245c3c; color:#b6f0cf; padding:10px 12px; border-radius:12px; margin-bottom:12px; }
-    .alert.warn { background:#2a2410; border-color:#5c4a18; color:#f5e3a1; }
+    .modal { background:var(--bg2); border:1px solid var(--line); width:min(780px,100%); max-height:92vh; overflow:auto; padding:16px; border-radius:20px 20px 0 0; }
     .muted { color:var(--muted); }
     .money-in { color:var(--ok); }
     .money-out { color:var(--danger); }
-    .check { display:flex; gap:8px; flex-wrap:wrap; }
-    .check label { color:var(--text); font-size:13px; display:flex; gap:6px; align-items:center; margin:0; }
-    .check input { width:auto; }
+    .ck-row { display:flex; justify-content:space-between; gap:8px; background:var(--bg); border:1px solid var(--line); border-radius:10px; padding:8px 10px; }
     .lock { position:fixed; inset:0; background:#05070d; z-index:80; display:grid; place-items:center; padding:24px; }
-    @media print {
-      nav.side, header.top, .no-print, .menu-btn { display:none !important; }
-      body, .app { background:#fff; color:#000; padding:0; display:block; }
-      .print-only { display:block !important; }
-    }
-    .print-only { display:none; }
-    .thermal { width:280px; font-size:12px; }
-    .timeline { list-style:none; margin:0; padding:0; }
-    .timeline li { position:relative; padding:0 0 18px 28px; }
-    .timeline li:before { content:""; position:absolute; left:6px; top:8px; width:10px; height:10px; border-radius:50%; background:#3a4a66; border:2px solid #1e90ff; }
-    .timeline li.done:before { background:#1e90ff; }
-    .timeline li.now:before { background:#3dd68c; }
-    .timeline li:after { content:""; position:absolute; left:10px; top:20px; bottom:0; width:2px; background:#1e2a44; }
-    .timeline li:last-child:after { display:none; }
+    .alert { background:#13281d; border:1px solid #245c3c; color:#b6f0cf; padding:10px 12px; border-radius:12px; margin-bottom:12px; }
+    .alert.warn { background:#2a2410; border-color:#5c4a18; color:#f5e3a1; }
   </style>
 </head>
 <body class="shop">
@@ -101,40 +79,47 @@
     <button data-view="dash" class="active" onclick="go('dash')">Início</button>
     <button data-view="clientes" onclick="go('clientes')">Clientes</button>
     <button data-view="os" onclick="go('os')">Ordens de serviço</button>
+    <button data-view="modelos" onclick="go('modelos')">Modelos de OS</button>
+    <button data-view="tecnicos" onclick="go('tecnicos')">Técnicos</button>
+    <button data-view="vendedores" onclick="go('vendedores')">Vendedores</button>
     <button data-view="estoque" onclick="go('estoque')">Estoque</button>
     <button data-view="fin" onclick="go('fin')">Caixa</button>
     <button data-view="rel" onclick="go('rel')">Relatórios</button>
+    <button data-view="whats" onclick="go('whats')">WhatsApp</button>
     <button class="quick" onclick="novaOS()">+ Nova OS</button>
   </nav>
   <div class="app">
     <header class="top">
       <button class="btn ghost sm menu-btn no-print" onclick="toggleMenu(true)">Menu</button>
       <div class="brand">
-        <div class="logo-mark"><svg width="30" height="30" viewBox="0 0 64 64" fill="none"><rect x="18" y="6" width="28" height="52" rx="6" stroke="#dfe7f5" stroke-width="3"/><path d="M26 22h8c4 0 7 3 7 7s-3 7-7 7h-4l8 12" stroke="#1e90ff" stroke-width="3.2" stroke-linecap="round"/></svg></div>
+        <div class="logo-mark"></div>
         <div><h1>ELITE <span>CELL</span></h1><p>Assistência técnica</p></div>
       </div>
-      <input id="qglobal" class="search no-print" style="max-width:260px" placeholder="IMEI, telefone, OS..." onkeydown="if(event.key==='Enter')buscaGlobal()">
+      <input id="qglobal" class="search no-print" placeholder="IMEI, telefone, OS..." onkeydown="if(event.key==='Enter')buscaGlobal()">
       <button class="btn ghost sm no-print" onclick="buscaGlobal()">Buscar</button>
       <button class="btn ghost sm no-print" onclick="exportData()">Backup</button>
     </header>
     <section id="view-dash"></section>
     <section id="view-clientes" class="hidden"></section>
     <section id="view-os" class="hidden"></section>
+    <section id="view-modelos" class="hidden"></section>
+    <section id="view-tecnicos" class="hidden"></section>
+    <section id="view-vendedores" class="hidden"></section>
     <section id="view-estoque" class="hidden"></section>
     <section id="view-fin" class="hidden"></section>
     <section id="view-rel" class="hidden"></section>
+    <section id="view-whats" class="hidden"></section>
     <section id="view-track" class="hidden"></section>
   </div>
   <div id="modalRoot"></div>
   <div id="printArea" class="print-only"></div>
   <div id="lockScreen" class="lock hidden">
     <div class="card" style="width:min(380px,100%)">
-      <h2 style="margin-top:0">ELITE <span style="color:var(--blue)">CELL</span></h2>
-      <p class="muted">Senha da loja</p>
-      <input id="lockPin" type="password">
+      <h2>ELITE CELL</h2>
+      <input id="lockPin" type="password" placeholder="Senha">
       <button class="btn" style="margin-top:12px;width:100%" onclick="unlock()">Entrar</button>
     </div>
   </div>
-<script src="app.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/gargaflex/elite-cell@main/app.js"></script>
 </body>
 </html>
